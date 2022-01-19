@@ -1,7 +1,7 @@
 all : a.out
 
 a.out : main.c
-	gcc $^ -o $@
+	gcc $^ -o $@ -Wall
 
 clean :
 	rm -rf a.out
