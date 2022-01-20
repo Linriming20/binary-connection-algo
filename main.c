@@ -67,7 +67,7 @@
 
 // 8邻域相对位置relative position
 int16_t relPos8[8] = {
-	-((MD_W_MACRO_CNT)-1), -(MD_W_MACRO_CNT), -((MD_W_MACRO_CNT)+1), 
+	-((MD_W_MACRO_CNT)+1), -(MD_W_MACRO_CNT), -((MD_W_MACRO_CNT)-1),
 	        -1,                /* pos */               1,
 	 ((MD_W_MACRO_CNT)-1),   MD_W_MACRO_CNT,   ((MD_W_MACRO_CNT)+1)
 };
@@ -146,7 +146,7 @@ void printBuf2(uint8_t *buf, uint32_t width, uint32_t height)
 }
 
 
-void markNeighbours(uint8_t *mdMacroData, uint16_t position, uint8_t markVal)
+void markNeighbours(uint8_t *mdMacroData, uint32_t width, uint32_t height, uint16_t position, uint8_t markVal)
 {
 	/* 标记 */
 	mdMacroData[position] = markVal;
@@ -154,9 +154,11 @@ void markNeighbours(uint8_t *mdMacroData, uint16_t position, uint8_t markVal)
     /* 8邻域查找并递归 */
 	for (int i = 0; i < 8; i++)
 	{
-		if (mdMacroData[position + relPos8[i]] == 1)
+		if ((position + relPos8[i]) >= 0 && \
+			(position + relPos8[i]) < width*height && \
+			(mdMacroData[position + relPos8[i]] == 1))
 		{
-			markNeighbours(mdMacroData, (position + relPos8[i]), markVal);
+			markNeighbours(mdMacroData, width, height, (position + relPos8[i]), markVal);
 		}
 	}
 	return;	
@@ -185,7 +187,7 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 
 			if (mdMacroData[index] == 1)
 			{
-				markNeighbours(mdMacroData, index, markVal);
+				markNeighbours(mdMacroData, width, height, index, markVal);
 				markVal++;
 			}
 		}
