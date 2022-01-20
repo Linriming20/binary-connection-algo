@@ -80,7 +80,6 @@ int16_t relPos8[8] = {
 
 #define  MD_AREA_MAX_NUM  32
 
-/* 仿造富翰的结构体 */
 typedef struct
 {
     uint32_t topLeftX; 	/*!< 矩形区域左上点水平方向上的坐标 */
@@ -89,13 +88,13 @@ typedef struct
     uint32_t butRightY; /*!< （用于内部计算，一般不对外开放！！）矩形区域右下点垂直方向上的坐标 */
     uint32_t width;     /*!< 矩形区域的宽度 */
     uint32_t height;    /*!< 矩形区域的高度 */
-}FHT_Rect_t;
+}Rect_t;
 
 
 typedef struct
 {
     uint32_t boxNum;
-    FHT_Rect_t box[MD_AREA_MAX_NUM];
+    Rect_t box[MD_AREA_MAX_NUM];
 } MdResult_t;
 
 
@@ -178,7 +177,7 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 	}
 
 
-	/* 1. 修改数据源：得到0/2/3/4... */
+	/* 1. 修改数据源：0/1 => 0/2/3/4... 其实这一步算法就已经得到结构了，后面的步骤自己根据实际需要处理数据而已 */
 	for (i = 0; i < height; i++)
 	{
 		for (j = 0; j < width; j++)
@@ -193,7 +192,7 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 		}
 	}
 
-	/* 2. 调整数据源：得到0/1/2/3... */
+	/* 2. 调整数据源：0/2/3/4... => 0/1/2/3...（如果考虑耗时，这一步可以去掉，相对地，后面的步骤也需要调整） */
 	for (i = 0; i < height; i++)
 	{
 		for (j = 0; j < width; j++)
@@ -210,7 +209,7 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 	/* 3. 算出框的位置 */
 	/* 3.1 先初始化 */
 	outMdResult->boxNum = 0;
-	for (i = 0; i < MD_AREA_MAX_NUM; i++)
+	for (i = 0; i < sizeof(outMdResult->box)/sizeof(outMdResult->box[0]); i++)
 	{
 		outMdResult->box[i].topLeftX = width;
 		outMdResult->box[i].topLeftY = height;
