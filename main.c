@@ -195,22 +195,8 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 		}
 	}
 
-	/* 2. 调整数据源：0/2/3/4... => 0/1/2/3...（如果考虑耗时，这一步可以去掉，相对地，后面的步骤也需要调整） */
-	for (i = 0; i < height; i++)
-	{
-		for (j = 0; j < width; j++)
-		{
-			index = i*width + j;
-
-			if (mdMacroData[index] != 0)
-			{
-				mdMacroData[index] = mdMacroData[index] - 1;
-			}
-		}
-	}
-
-	/* 3. 算出框的位置 */
-	/* 3.1 先初始化 */
+	/* 2. 算出框的位置 */
+	/* 2.1 先初始化 */
 	outMdResult->boxNum = 0;
 	for (i = 0; i < mdBoxMaxNum; i++)
 	{
@@ -220,7 +206,7 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 		outMdResult->box[i].butRightY = 0;
 	}
 
-	/* 3.2 再计算结左上角&右下角的坐标 */
+	/* 2.2 再计算结左上角&右下角的坐标 */
 	for (i = 0; i < height; i++)
 	{
 		for (j = 0; j < width; j++)
@@ -228,6 +214,13 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 			index = i*width + j;
 			val = mdMacroData[index];
 
+			if (val >= mdBoxMaxNum + 2)
+			{
+				printf("warning: box array is too small and maybe loss some 'box'.\n");
+				goto calc_end;
+			}
+
+			// src data is 0/2/3/4...
 			if (val >= 2 && val < mdBoxMaxNum + 2)
 			{
 				outMdResult->boxNum = MAX(outMdResult->boxNum, val-1);
@@ -238,8 +231,9 @@ int binConnectAlgo(uint8_t *mdMacroData, uint32_t width, uint32_t height, MdResu
 			}
 		}
 	}
+calc_end:
 
-	/* 3.3 根据左上角&右下角的坐标计算框的宽度及高度（注：宽度和高度是不能在3.2的统计过程得到的） */
+	/* 2.3 根据左上角&右下角的坐标计算框的宽度及高度（注：宽度和高度是不能在2.2的统计过程得到的） */
 	for (i = 0; i < outMdResult->boxNum; i++)
 	{
 		outMdResult->box[i].width  = outMdResult->box[i].butRightX - outMdResult->box[i].topLeftX + 1;
